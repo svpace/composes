@@ -1,0 +1,12 @@
+{
+	"connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "user",
+    "database.password": "password",
+    "database.dbname" : "database",
+	"plugin.name": "pgoutput",
+	"snapshot.mode": "never",
+    "table.include.list": "messages",
+	"topic.prefix": "postgres"
+}

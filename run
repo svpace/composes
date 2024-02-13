@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+help() {
+	cat << EOF
+Usage:
+	run <command>
+Commands:
+	kf			Kafka related commands
+	pg			Postgres related commands
+EOF
+}
+
+kf() {
+	"kf_${@:-help}"
+}
+
+kf_help() {
+	cat << EOF
+Usage:
+	run kf <command>
+Commands:
+	topics				List topics
+	consume <topic>		Consume events from topic
+	produce <topic>		Produce evebts to topic
+EOF
+}
+
+kf_do() {
+	docker run -it --rm --network host confluentinc/cp-kafka:7.5.0 "$@" --bootstrap-server localhost:19092
+}
+
+kf_topics() {
+	kf_do kafka-topics --list
+}
+
+kf_produce() {
+	kf_do kafka-console-producer --topic "${@:-test}"
+}
+
+kf_consume() {
+	kf_do kafka-console-consumer --topic "${@:-test}"
+}
+
+"${@:-help}"

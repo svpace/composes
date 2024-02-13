@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16.0-alpine
+    ports:
+      - "15432:5432"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=database
+    volumes:
+      - ./postgres:/docker-entrypoint-initdb.d
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 12181:2181
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: BROKER://:9092,EXTERNAL://:19092
+      KAFKA_ADVERTISED_LISTENERS: BROKER://kafka:9092,EXTERNAL://localhost:19092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: BROKER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - 19092:19092
+
+  connect:
+    image: debezium/connect:2.3
+    depends_on:
+      - kafka
+    ports:
+      - 18083:8083
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      CONFIG_STORAGE_TOPIC: debezium-config
+      OFFSET_STORAGE_TOPIC: debezium-offset
+      STATUS_STORAGE_TOPIC: debezium-status
+
+  connect-init:
+    image: alpine/curl:8.3.0
+    command: /docker-entrypoint-init.d/init.sh
+    depends_on:
+      - connect
+    volumes:
+      - ./connect:/docker-entrypoint-init.d/
+
+
+
