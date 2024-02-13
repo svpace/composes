@@ -1,0 +1,3 @@
+include:
+  - kafka.yaml
+  - schema-registry.yaml

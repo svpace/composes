@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+run-help() {
+	cat <<-EOF
+		Usage: run <command>
+
+		Where <command> is one of:
+		- kafka       Kafka related commands
+		- mongo       Mongo related commands
+		- pg          Postgres related commands
+	EOF
+}
+
+run-kafka() {
+	"run-kafka-${@:-help}"
+}
+
+run-kafka-help() {
+	cat <<-EOF
+		Usage: run kafka <command>
+
+		Where <command> is one of:
+		- topics                List topics
+		- consume <topic>       Consume events from <topic>
+		- produce <topic>       Produce evebts to <topic>
+	EOF
+}
+
+kf_do() {
+	docker run -it --rm --network host confluentinc/cp-kafka:7.5.0 "$@" --bootstrap-server localhost:19092
+}
+
+kf_topics() {
+	kf_do kafka-topics --list
+}
+
+kf_produce() {
+	kf_do kafka-console-producer --topic "${@:-test}"
+}
+
+kf_consume() {
+	kf_do kafka-console-consumer --topic "${@:-test}"
+}
+
+run-mongo() {
+	"run-mongo-${@:-help}"
+}
+
+run-mongo-help() {
+	cat <<-EOF
+		Usage: run mongo <command>
+
+		Where <command> can be one of:
+		- compass <url>     Connect to <url> using compass, defaults to "username:password@localhost:27017"
+	EOF
+}
+
+mongo_default_url='username:password@localhost:27017/?replicaSet=rs0&directConnection=true'
+
+run-mongo-compass() {
+	mongodb-compass-isolated "mongodb://${1:-$mongo_default_url}"
+}
+
+"run-${@:-help}"

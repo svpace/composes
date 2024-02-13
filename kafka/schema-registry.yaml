@@ -1,0 +1,14 @@
+services:
+  schema-registry:
+    image: confluentinc/cp-schema-registry:${COMPOSE_SCHEMA_REGISTRY_PORT:-latest}
+    hostname: schema-registry
+    ports:
+      - ${COMPOSE_SCHEMA_REGISTRY_PORT:-8081}:8081
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9091
+      # SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: '192.0.2.21:2181,192.0.2.22:2181,192.0.2.23:2181'
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      #SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: 'backward'
+    depends_on:
+      - kafka

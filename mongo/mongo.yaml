@@ -1,0 +1,52 @@
+services:
+  mongo:
+    image: mongo:${COMPOSE_MONGO_VERSION:-latest}
+    #entrypoint: cat /run/secrets/keyfile
+    command:
+      - --bind_ip_all
+      - --replSet=rs0
+      - --keyFile=/run/secrets/keyfile
+    hostname: mongo
+    ports:
+      - ${COMPOSE_MONGO_PORT:-27017}:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${COMPOSE_MONGO_USERNAME:-username}
+      MONGO_INITDB_ROOT_PASSWORD: ${COMPOSE_MONGO_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: ${COMPOSE_MONGO_DATABASE:-database}
+    healthcheck:
+      test: |
+        mongosh --quiet \
+          --username "$${MONGO_INITDB_ROOT_USERNAME}" \
+          --password "$${MONGO_INITDB_ROOT_PASSWORD}" \
+          --eval "try { rs.status() } catch { rs.initiate() }"
+      interval: 30s
+      start_period: 10s
+      start_interval: 3s
+    volumes:
+      - ./initdb.d:/docker-entrypoint-initdb.d
+    configs:
+      - source: keyfile
+        target: /run/secrets/keyfile
+        uid: "999"
+        gid: "999"
+        mode: 0400
+configs:
+  keyfile:
+    # openssl rand -base64 756
+    content: |
+      GweAZPStejoaa450qDmL8u8IzJsMSqWiKjQkekQQcRgTJTh5T2D0VYLvGOhBy3MK
+      akevypDp55KwYMlBRoSnXczUv9yTHhvAUT1OftKF4qieuoVbATorMtqYg0alBv5m
+      kXuD9fNVuVwvk9WWIn/2m1vOaNKLjLNl9PFRFFCUrDeBO1+IDJZefJBoCVaratH1
+      A9+PqO8NqnRCdVfrDrd4x4RbwKQZ1vx0PvvKBM7iQFRmnF8Bz8UHGa9/cXaucxqx
+      jOZnkp8EJKDuwGUu/zf+vDnRe4BkIUBHOvlbOYU+zIrcBDotMNieXux5iSve9Lf3
+      LliS/mKbDLzviK0IevZXza79jxLHoopX2T5Zg0YCX6WSuEj05I0ZTZ5rQtmuu8Qe
+      jc2SoKnyXPTQjme6J+pTZ+tn2jcdDPwNHHUALMXBsS+SIuqoXyIDQNRBBVfZ62Qv
+      lrs7qy/btJ3P1cPAJLL60TmTCHT3cBgI0ZiamvCbgnmTYzIM+unNdk+vD1ZYajh8
+      9qtCCUsXCv6LmXZ0oMF5oGdc08eSLnyYxl+aU+s6n7M9nS0VMwZO85wPY4lCA0xQ
+      ARdD+lhejmTX41K69SPYPZL9PFqBAZKp94D2JCYFcMMDH2wMffC+cCaMfrGhuC19
+      8ep8xRsaQvwvf9O7WUzu4uCF/dXpkG19KfzFKcaj3Ju0jx0dXpqqrPRyPxGFy3dh
+      kuiCPgcKmRX6XOkPhfvN06ZIdDBVQllcklKUu9mWy2nhWRlxo67AC121LCenWnPf
+      P0VOzXcPfPfMILPFb+nOG7EgK+5lb+FPcnbXBTJ+nwd2q5UUubfEfRC/Dep21htE
+      RD5xZvE4b4OkyDaNkXKBnBjG+KA3jPnceznV7OWrE+7FqrA3FS8/IAZCDWnOTk/8
+      5ZzmaT7sHVyQLLKZA7lWshVc1CrlOCCdgjqD6znO4yEru/Gf831WU11G/nz9kB06
+      eecegvz5vsq4o1Q65C8XuAyZZ3uio7C5PbesRv6Pr8XNeBvR

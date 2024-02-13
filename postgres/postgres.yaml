@@ -1,0 +1,10 @@
+services:
+  postgres:
+    image: postgres:${COMPOSE_POSTGRES_VERSION:-alpine}
+    environment:
+      POSTGRES_USER: ${COMPOSE_POSTGRES_USERNAME:-username}
+      POSTGRES_PASSWORD: ${COMPOSE_POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${COMPOSE_POSTGRES_DB:-database}
+    stop_grace_period: "3s"
+    volumes:
+      - ./initdb.d:/docker-entrypoint-initdb.d
